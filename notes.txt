@@ -1,0 +1,47 @@
+ARCHITECTURE MAPREDUCE (créé par Google)
+
+Les données en entrée correspondent aux fichiers
+texte dans le dossier 'input'
+
+Le découpage (étape qui précède au mapping) découpe
+les données en bloc de 128MB par défaut (avec Hadoop).
+
+Chaque instance de Mapper va traiter son propre corpus, 
+il va tokeniser les mots et retourner une liste
+de paires (mot;1).
+
+L'étape de répartition (shuffling) va faire en sorte
+que chaque instance de Reducer ait une liste de paires
+avec la même clé (correspondant à un mot). Il va 
+retourner le nombre d'éléments dans la liste qu'il
+a reçu (contenant les mêmes mots).
+
+Le résultat va rassembler tous les retours de chaque
+instance de Reducer pour faire un compte total des
+mots et présenter chaque paire clé:valeur avec
+comme clé un mot distinct et en valeur le nombre
+d'occurences dans le corpus d'entrée (dossier input).
+Il stocke le résultat dans le dossier output.
+
+_______________________________________________________
+
+SYSTEME DE FICHIER HDFS (Hadoop -- créé par Apache)
+
+Ce système est constitué de différents types de 
+composants, dont les principaux sont les noeuds de
+nommage (NameNodes) et noeuds de données (DataNodes).
+
+Noeud de nommage : (mapreduce master)unique au cluster, 
+il gère l'espace des noms de fichiers et dossiers et 
+permet de les localiser dans le cluster.
+
+Noeud de données : (mapreduce slave), il stocke les
+blocs de données constituant les fichiers (leur contenu)
+
+Hadoop utilise YARN comme gestionnaire de ressources.
+
+Arborescence HDFS pour pouvoir executer des jobs
+MapReduce :
+/user/<username>/
+    -> input/
+    -> output/
