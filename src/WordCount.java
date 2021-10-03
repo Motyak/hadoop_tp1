@@ -1,3 +1,4 @@
+import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -14,35 +15,37 @@ public class WordCount
     public static class WordCountMapper extends Mapper<LongWritable, Text, Text, IntWritable>
     {
         @Override
-        public void map(LongWritable key, Text value, Context context)
-        { 
-            // String string = value.toString();
-            // if(!string.isEmpty())
-            // {
-            //     Text outText = new Text(string.substring(0,1));
-            //     int val = ThreadLocalRandom.current().nextInt(1,100);
-            //     IntWritable outVal = new IntWritable(val);
-            //     context.write(outText, outVal);
-            // }
+        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
+        {
+            /* Je tokenise le texte en mots */
+            String[] tokens = value.toString().split("\\P{L}+");
+
+            /* Je traite les tokens et écris les paires résultats */
+            for(String str : tokens)
+                if(!str.isBlank())
+                    context.write(
+                        new Text(str.toLowerCase()),
+                        new IntWritable(1)
+                    );
         }
     }
 
     public static class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritable>
     {
         @Override
-        public void reduce(Text key, Iterable<IntWritable> values, Context context)
+        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException
         {
-            // int sum = 0;
-            // for(IntWritable value: values)
-            // {
-            //     sum = sum + value.get();
-            // }
-            // IntWritable outVal = new IntWritable(sum);
-            // context.write(key, outVal);
+            /* on calcule la somme des entiers */
+            int sum = 0;
+            for(IntWritable i : values)
+                sum += i.get();
+
+            /* On écrit le résultat dans une paire */
+            context.write(key, new IntWritable(sum));
         }
     }
 
-    public static void main(String[] args) throws Exception
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException
     {
         Configuration config = new Configuration();
         Job job = Job.getInstance(config, "WordCount program");
